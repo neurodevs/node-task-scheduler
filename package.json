@@ -1,6 +1,6 @@
 {
   "name": "node-task-scheduler",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "repository": "https://github.com/neurodevs/node-task-scheduler.git",
   "scripts": {
     "build.ci": "yarn build.tsc && yarn build.resolve-paths && yarn lint",
@@ -64,5 +64,11 @@
     "moduleNameMapper": {
       "^#spruce/(.*)$": "<rootDir>/build/.spruce/$1"
     }
+  },
+  "dependencies": {
+    "@sprucelabs/error": "^5.1.65",
+    "@sprucelabs/schema": "^29.4.6",
+    "@sprucelabs/spruce-core-schemas": "^39.0.232",
+    "@sprucelabs/spruce-skill-utils": "^30.1.107"
   }
 }
