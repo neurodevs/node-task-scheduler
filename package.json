@@ -1,5 +1,5 @@
 {
-  "name": "node-task-scheduler",
+  "name": "@neurodevs/node-task-scheduler",
   "version": "0.1.0",
   "repository": "https://github.com/neurodevs/node-task-scheduler.git",
   "scripts": {
