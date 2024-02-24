@@ -15,19 +15,28 @@ export default class TaskSchedulerTest extends AbstractSpruceTest {
 		await super.beforeEach()
 
 		this.scheduler = new SpyTaskScheduler()
-		this.durationMs = randomInt(10, 20)
+		this.durationMs = randomInt(20, 50)
 		this.callback = () => {}
 
 		assert.isTruthy(this.scheduler)
 	}
 
 	@test()
-	protected static async throwsIfNoScheduledTasks() {
+	protected static async throwsOnStartIfNoScheduledTasks() {
 		const err = await assert.doesThrowAsync(
 			() => this.scheduler.start(),
 			'Cannot start task scheduler if no tasks are scheduled!'
 		)
 		errorAssert.assertError(err, 'NO_SCHEDULED_TASKS')
+	}
+
+	@test()
+	protected static async throwsOnStopIfNotAlreadyStarted() {
+		const err = await assert.doesThrowAsync(
+			() => this.scheduler.stop(),
+			'Cannot stop task scheduler if it has not been started!'
+		)
+		errorAssert.assertError(err, 'SCHEDULER_NOT_STARTED')
 	}
 
 	@test()
@@ -90,9 +99,53 @@ export default class TaskSchedulerTest extends AbstractSpruceTest {
 		assert.isBelow(duration, 1.1 * this.durationMs)
 	}
 
-	private static scheduleTask() {
-		this.scheduler.scheduleTask(this.durationMs, this.callback)
-		return { durationMs: this.durationMs, callback: this.callback }
+	@test()
+	protected static async stopCancelsOneScheduledTasks() {
+		this.scheduleTask()
+		const startPromise = this.start()
+		await this.scheduler.stop()
+		const scheduledTasks = this.scheduler.getScheduledTasks()
+		assert.isEqualDeep(scheduledTasks, [])
+
+		await startPromise
+	}
+
+	@test()
+	protected static async stopCancelsTwoScheduledTasks() {
+		this.scheduleTask()
+		this.scheduleTask()
+		const startPromise = this.start()
+		await this.scheduler.stop()
+		const scheduledTasks = this.scheduler.getScheduledTasks()
+		assert.isEqualDeep(scheduledTasks, [])
+
+		await startPromise
+	}
+
+	@test()
+	protected static async stopPreventsCallbackFromBeingExecuted() {
+		let wasHit = false
+
+		const mockCallback = () => {
+			wasHit = true
+		}
+
+		this.scheduleTask()
+		this.scheduleTask({ durationMs: 1000, callback: mockCallback })
+		const startPromise = this.start()
+		await this.scheduler.stop()
+		await startPromise
+		assert.isFalse(wasHit)
+	}
+
+	private static scheduleTask(options?: {
+		durationMs?: number
+		callback?: () => void
+	}) {
+		const { durationMs = this.durationMs, callback = this.callback } =
+			options ?? {}
+		this.scheduler.scheduleTask(durationMs, callback)
+		return { durationMs, callback }
 	}
 
 	private static async start() {

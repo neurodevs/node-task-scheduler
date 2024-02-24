@@ -1,6 +1,7 @@
 export interface Scheduler {
+	scheduleTask(durationMs: number, callback: () => void): void
 	start(): Promise<void>
-	scheduleTask(delayMs: number, callback: () => void): void
+	stop(): Promise<void>
 }
 
 export interface Task {

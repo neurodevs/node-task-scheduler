@@ -10,6 +10,11 @@ export default class SpruceError extends BaseSpruceError<ErrorOptions> {
 			case 'NO_SCHEDULED_TASKS':
 				message = 'Cannot start task scheduler if no tasks are scheduled!'
 				break
+
+			case 'SCHEDULER_NOT_STARTED':
+				message = 'Cannot stop task scheduler if it has not been started!'
+				break
+
 			default:
 				message = super.friendlyMessage()
 		}
