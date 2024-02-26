@@ -10,13 +10,13 @@ export default class TaskScheduler implements Scheduler {
 		this.isRunning = false
 	}
 
-	public scheduleTask(durationMs: number, callback: () => void) {
-		this.scheduledTasks.push({ durationMs, callback })
+	public scheduleTask(callback: () => void, waitMs: number) {
+		this.scheduledTasks.push({ callback, waitMs })
 	}
 
 	public async start() {
-		this.isRunning = true
 		this.assertAtLeastOneTaskScheduled()
+		this.isRunning = true
 		await this.executeTasks()
 	}
 
@@ -31,14 +31,14 @@ export default class TaskScheduler implements Scheduler {
 			if (!this.isRunning) {
 				break
 			}
-			const { callback, durationMs } = task
+			const { callback, waitMs } = task
 			callback()
-			await this.wait(durationMs)
+			await this.wait(waitMs)
 		}
 	}
 
-	private async wait(durationMs: number) {
-		await new Promise((resolve) => setTimeout(resolve, durationMs))
+	private async wait(waitMs: number) {
+		await new Promise((resolve) => setTimeout(resolve, waitMs))
 	}
 
 	public async stop() {

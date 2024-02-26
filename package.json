@@ -1,6 +1,6 @@
 {
   "name": "@neurodevs/node-task-scheduler",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "repository": "https://github.com/neurodevs/node-task-scheduler.git",
   "scripts": {
     "build.ci": "yarn build.tsc && yarn build.resolve-paths && yarn lint",

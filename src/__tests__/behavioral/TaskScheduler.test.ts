@@ -8,15 +8,15 @@ import SpyTaskScheduler from '../../testDoubles/SpyTaskScheduler'
 
 export default class TaskSchedulerTest extends AbstractSpruceTest {
 	private static scheduler: SpyTaskScheduler
-	private static durationMs: number
 	private static callback: () => void
+	private static waitMs: number
 
 	protected static async beforeEach() {
 		await super.beforeEach()
 
 		this.scheduler = new SpyTaskScheduler()
-		this.durationMs = randomInt(20, 50)
 		this.callback = () => {}
+		this.waitMs = randomInt(20, 50)
 
 		assert.isTruthy(this.scheduler)
 	}
@@ -62,7 +62,7 @@ export default class TaskSchedulerTest extends AbstractSpruceTest {
 			wasHit = true
 		}
 
-		this.scheduler.scheduleTask(this.durationMs, mockCallback)
+		this.scheduler.scheduleTask(mockCallback, this.waitMs)
 		await this.start()
 		assert.isTrue(wasHit)
 	}
@@ -80,8 +80,8 @@ export default class TaskSchedulerTest extends AbstractSpruceTest {
 			wasHit2 = true
 		}
 
-		this.scheduler.scheduleTask(this.durationMs, mockCallback1)
-		this.scheduler.scheduleTask(this.durationMs, mockCallback2)
+		this.scheduler.scheduleTask(mockCallback1, this.waitMs)
+		this.scheduler.scheduleTask(mockCallback2, this.waitMs)
 		await this.start()
 		assert.isTrue(wasHit1)
 		assert.isTrue(wasHit2)
@@ -95,8 +95,8 @@ export default class TaskSchedulerTest extends AbstractSpruceTest {
 		const endTime = Date.now()
 
 		const duration = endTime - startTime
-		assert.isAbove(duration, 0.9 * this.durationMs)
-		assert.isBelow(duration, 1.1 * this.durationMs)
+		assert.isAbove(duration, 0.9 * this.waitMs)
+		assert.isBelow(duration, 1.1 * this.waitMs)
 	}
 
 	@test()
@@ -131,7 +131,7 @@ export default class TaskSchedulerTest extends AbstractSpruceTest {
 		}
 
 		this.scheduleTask()
-		this.scheduleTask({ durationMs: 1000, callback: mockCallback })
+		this.scheduleTask({ callback: mockCallback, waitMs: 1000 })
 		const startPromise = this.start()
 		await this.scheduler.stop()
 		await startPromise
@@ -139,13 +139,12 @@ export default class TaskSchedulerTest extends AbstractSpruceTest {
 	}
 
 	private static scheduleTask(options?: {
-		durationMs?: number
 		callback?: () => void
+		waitMs?: number
 	}) {
-		const { durationMs = this.durationMs, callback = this.callback } =
-			options ?? {}
-		this.scheduler.scheduleTask(durationMs, callback)
-		return { durationMs, callback }
+		const { callback = this.callback, waitMs = this.waitMs } = options ?? {}
+		this.scheduler.scheduleTask(callback, waitMs)
+		return { callback, waitMs }
 	}
 
 	private static async start() {
